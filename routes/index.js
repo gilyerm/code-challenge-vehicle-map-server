@@ -6,21 +6,29 @@ const inside = require('point-in-polygon');
 // Endpoint1 - query all of the vehicle locations
 router.get("/",async function(req,res,next){
   console.log(req.query);
-  let json = await fetch("https://raw.githubusercontent.com/Autofleet/code-challenge-vehicle-map/master/vehicles-location.json")
-      .then(res => res.json())
-      .then(vehicles => vehicles.map(vehicle => { return {id:vehicle.id , lat:vehicle.location.lat,lng:vehicle.location.lng}}));
-  console.log(json);
-  res.send(json);
+  let vehicles = await fetch("https://raw.githubusercontent.com/Autofleet/code-challenge-vehicle-map/master/vehicles-location.json")
+      .then(res => res.json());
+  vehicles = vehicles.map(vehicle => { return {lat:vehicle.location.lat,lng:vehicle.location.lng}});
+  console.log(vehicles);
+  res.send(vehicles);
 });
 
 // Endpoint 2- get vehicles ids that are inside of the specific polygon
 router.get("/query/",async function (req, res, next) {
   const polygon = JSON.parse(req.query.data);
-  let json = await fetch("https://raw.githubusercontent.com/Autofleet/code-challenge-vehicle-map/master/vehicles-location.json")
-      .then(res => res.json())
-      .then(vehicles => vehicles.map(vehicle => { return {id:vehicle.id , lat:vehicle.location.lat,lng:vehicle.location.lng}}));
-  json = json.filter((v)=> inside([v.lat,v.lng],polygon));
-  res.send(json);
+  let vehicles = await fetch("https://raw.githubusercontent.com/Autofleet/code-challenge-vehicle-map/master/vehicles-location.json")
+      .then(res => res.json());
+  vehicles = vehicles.filter((v)=> inside([v.location.lat,v.location.lng],polygon))
+                    .map(vehicle =>  vehicle.id);
+  res.send(vehicles);
+});
+// Endpoint 3- get vehicle by id
+router.get("/get/",async function (req, res, next) {
+  const id = JSON.parse(req.query.id);
+  let vehicles = await fetch("https://raw.githubusercontent.com/Autofleet/code-challenge-vehicle-map/master/vehicles-location.json")
+      .then(res => res.json());
+  vehicles = vehicles.filter((v)=> v.id === id);
+  res.send(vehicles);
 });
 
 
