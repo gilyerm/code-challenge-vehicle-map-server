@@ -7,7 +7,9 @@ const inside = require('point-in-polygon');
 router.get("/",async function(req,res,next){
   console.log(req.query);
   let json = await fetch("https://raw.githubusercontent.com/Autofleet/code-challenge-vehicle-map/master/vehicles-location.json")
-      .then(res => res.json());
+      .then(res => res.json())
+      .then(vehicles => vehicles.map(vehicle => { return {id:vehicle.id , lat:vehicle.location.lat,lng:vehicle.location.lng}}));
+  console.log(json);
   res.send(json);
 });
 
@@ -15,8 +17,9 @@ router.get("/",async function(req,res,next){
 router.get("/query/",async function (req, res, next) {
   const polygon = JSON.parse(req.query.data);
   let json = await fetch("https://raw.githubusercontent.com/Autofleet/code-challenge-vehicle-map/master/vehicles-location.json")
-      .then(res => res.json());
-  json = json.filter((v)=> inside([v.location.lat,v.location.lng],polygon));
+      .then(res => res.json())
+      .then(vehicles => vehicles.map(vehicle => { return {id:vehicle.id , lat:vehicle.location.lat,lng:vehicle.location.lng}}));
+  json = json.filter((v)=> inside([v.lat,v.lng],polygon));
   res.send(json);
 });
 
